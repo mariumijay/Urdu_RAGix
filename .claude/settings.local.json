@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp cleaner.py ingestion/cleaner.py)",
+      "Bash(cp chunker.py ingestion/chunker.py)",
+      "Bash(cp embedder.py ingestion/embedder.py)",
+      "Bash(cp faiss_retriever.py retrieval/faiss_retriever.py)",
+      "Bash(cp bm25_retriever.py retrieval/bm25_retriever.py)",
+      "Bash(pip install:*)",
+      "Bash(pip show:*)",
+      "Bash(python main.py)",
+      "Bash(where python:*)",
+      "Bash(\"C:/Users/pc/miniconda3/python.exe\" --version)",
+      "Bash(\"C:/Users/pc/miniconda3/python.exe\" main.py)",
+      "Bash(python -c \"import fastapi, uvicorn, sentence_transformers, faiss, rank_bm25, google.genai\")"
+    ]
+  }
+}
