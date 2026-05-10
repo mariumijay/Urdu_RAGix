@@ -407,7 +407,7 @@ async def _run_paper(urdu_query: str) -> None:
         used_ids.update(c.get("chunk_id") for c in chosen if c.get("chunk_id"))
         return chosen
 
-    def cap(chunks, max_chars=150):
+    def cap(chunks, max_chars=300):
         """Hard-cap each chunk's text to limit input tokens."""
         return [{**c, "text": c.get("text", "")[:max_chars]} for c in chunks]
 
@@ -434,13 +434,14 @@ async def _run_paper(urdu_query: str) -> None:
     fallback = cap(pick(meta_a, 3) + pick(meta_b, 1))
 
     part_configs = [
-        (1, p1 or fallback, 1400),
-        (2, p2 or fallback,  900),
-        (3, p3 or fallback,  900),
-        (4, p4 or fallback,  800),
-        (5, p5 or fallback,  800),
-        (6, p6 or fallback,  700),
+        (1, p1 or fallback, 2000),
+        (2, p2 or fallback,  1500),
+        (3, p3 or fallback,  1500),
+        (4, p4 or fallback,  1200),
+        (5, p5 or fallback,  1200),
+        (6, p6 or fallback,  1000),
     ]
+
 
     for i, (part, p_chunks, max_tok) in enumerate(part_configs):
         print(f"  ⏳ حصہ {part}/6 تیار ہو رہا ہے…")

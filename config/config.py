@@ -94,3 +94,34 @@ GENRE_TO_MODE: dict[str, str] = {
     "story":               "story",
     "dialogue":            "dialogue",
 }
+
+# In config.py — add this
+
+MODEL_ROUTING = {
+    # Light/objective — llama-3.1-8b-instant (fast, low tokens)
+    "mcq":                 "llama-3.1-8b-instant",
+    "word_meanings":       "llama-3.1-8b-instant",
+    "sentence_correction": "llama-3.1-8b-instant",
+    "zarbul_imsal":        "llama-3.1-8b-instant",
+    "translation":         "llama-3.1-8b-instant",
+
+    # Medium — llama-3.3-70b-versatile (good Urdu, balanced)
+    "short_question":      "llama-3.3-70b-versatile",
+    "general_qa":          "llama-3.3-70b-versatile",
+    "comprehension":       "llama-3.3-70b-versatile",
+    "markazi_khyal":       "llama-3.3-70b-versatile",
+
+    # Heavy/creative — llama-3.3-70b-versatile (best Urdu quality)
+    "tashreeh_ghazal":     "llama-3.3-70b-versatile",
+    "tashreeh_nazam":      "llama-3.3-70b-versatile",
+    "nasar_tashreeh":      "llama-3.3-70b-versatile",
+    "poem_explanation":    "llama-3.3-70b-versatile",
+    "khulasa":             "llama-3.3-70b-versatile",
+    "application":         "llama-3.3-70b-versatile",
+    "letter":              "llama-3.3-70b-versatile",
+    "story":               "llama-3.3-70b-versatile",
+    "dialogue":            "llama-3.3-70b-versatile",
+
+    # Paper — llama-3.1-8b-instant (single call, minimal prompt)
+    "paper":               "llama-3.1-8b-instant",
+}

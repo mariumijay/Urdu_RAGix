@@ -4,7 +4,8 @@ Exposes: POST /query, POST /ingest, GET /chunks, GET /health
 """
 
 from __future__ import annotations
-
+from generation.prompt_b import detect_intent  # add this import at top
+from config.config import GENRE_TO_MODE 
 import json
 import logging
 import os
@@ -153,16 +154,20 @@ async def query_endpoint(req: QueryRequest):
 
     urdu_query, _ = normalize_query(req.query)
     await classify_query_full(urdu_query)
+    
+    # ── Detect genre + mode ──────────────────────────────
+    genre = detect_intent(urdu_query)
+    mode  = GENRE_TO_MODE.get(genre, "short")
+    
     chunks = _retrieve(urdu_query, top_k=req.top_k)
 
     if req.stream:
         async def event_stream():
-            async for char in stream_answer(urdu_query, chunks):
+            async for char in stream_answer(urdu_query, chunks, mode=mode, genre=genre):
                 yield char
-
         return StreamingResponse(event_stream(), media_type="text/event-stream")
 
-    result = await generate_answer(urdu_query, chunks)
+    result = await generate_answer(urdu_query, chunks, mode=mode, genre=genre)
 
     citations = [
         CitationSchema(

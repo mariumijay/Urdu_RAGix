@@ -8,6 +8,8 @@ import logging
 from groq import AsyncGroq, RateLimitError, AuthenticationError
 from generation.prompt import build_prompt, build_citations
 from config.config import RAG_MODES
+from config.config import MODEL_ROUTING
+
 
 logger = logging.getLogger(__name__)
 
@@ -106,21 +108,22 @@ async def _create_completion(model: str, messages: list, stream: bool, **kwargs)
 
 
 # ── Public API ───────────────────────────────────────────────────────────────
-
-async def stream_answer(query, context_chunks, model=None, mode="short"):
-    _, _, max_output = _get_mode_limits(mode) 
+async def stream_answer(query, context_chunks, model=None, mode="short", genre=None):
+    _, _, max_output = _get_mode_limits(mode)
+    if not model:
+        model = MODEL_ROUTING.get(genre, DEFAULT_MODEL)
     safe_chunks = _trim_chunks(context_chunks, mode=mode)
     messages    = build_prompt(query, safe_chunks)
 
-    full_response = []  # buffer to strip <think> after stream ends
+    full_response = []
 
     try:
         stream = await _create_completion(
-        model=model or DEFAULT_MODEL,
-        messages=messages,
-        stream=True,
-        temperature=0.2,
-        max_tokens=max_output,
+            model=model,
+            messages=messages,
+            stream=True,
+            temperature=0.2,
+            max_tokens=max_output,
         )
 
         async for chunk in stream:
@@ -128,7 +131,6 @@ async def stream_answer(query, context_chunks, model=None, mode="short"):
             if delta:
                 full_response.append(delta)
 
-        # Strip <think> from complete buffered response then yield
         clean = _strip_thinking("".join(full_response))
         for char in clean:
             yield char
@@ -138,23 +140,23 @@ async def stream_answer(query, context_chunks, model=None, mode="short"):
         yield f"\n\nخرابی: {str(e)}"
 
 
-async def generate_answer(query, context_chunks, model=None, mode: str = "short") -> dict:
-    """Non-streaming: return full answer + citations."""
-    model       = model or DEFAULT_MODEL
+async def generate_answer(query, context_chunks, model=None, mode="short", genre=None) -> dict:
+    if not model:
+        model = MODEL_ROUTING.get(genre, DEFAULT_MODEL)
     safe_chunks = _trim_chunks(context_chunks, mode=mode)
     _, _, max_output = _get_mode_limits(mode)
     messages    = build_prompt(query, safe_chunks)
 
     try:
         response = await _create_completion(
-            model=model or DEFAULT_MODEL,
+            model=model,
             messages=messages,
             stream=False,
             temperature=0.2,
             max_tokens=max_output,
         )
 
-        answer    = _strip_thinking(response.choices[0].message.content)  # ← stripped
+        answer    = _strip_thinking(response.choices[0].message.content)
         citations = build_citations(safe_chunks)
 
         return {
